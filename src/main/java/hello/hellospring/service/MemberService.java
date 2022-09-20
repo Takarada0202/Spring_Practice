@@ -1,32 +1,48 @@
 package hello.hellospring.service;
+
 import hello.hellospring.domain.Member;
-import hello.hellospring.repository.MemberRepository;
-import hello.hellospring.repository.MemoryMemberRepository;
+import org.apache.catalina.Session;
+import org.apache.catalina.Store;
 
+import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
+import java.util.Scanner;
+
+@Transactional
 public class MemberService {
-    private final MemberRepository memberRepository = new MemoryMemberRepository();
-
-    public MemberService(MemoryMemberRepository memberRepository) {
+    /**
+     * 회원가입
+     */
+    public Long join(Member member) throws IOException {
+        long start = System.currentTimeMillis();
+        try {
+            validateDuplicateMember(member); //중복 회원 검증
+            Store memberRepository = null;
+            memberRepository.save((Session) member);
+            return member.getId();
+        } finally {
+            long finish = System.currentTimeMillis();
+            long timeMs = finish - start;
+            System.out.println("join " + timeMs + "ms");
+        }
     }
 
-    public Long join(Member member) {
-        validateDuplicateMember(member); //중복 회원 검증
-        memberRepository.save(member);
-        return member.getId();
-    }
     private void validateDuplicateMember(Member member) {
-        memberRepository.findByName(member.getName())
-                .ifPresent(m -> {
-                    throw new IllegalStateException("이미 존재하는 회원입니다.");
-                });
     }
 
+    /**
+     * 전체 회원 조회
+     */
     public List<Member> findMembers() {
-        return memberRepository.findAll();
-    }
-    public Optional<Member> findOne(Long memberId) {
-        return memberRepository.findById(memberId);
+        long start = System.currentTimeMillis();
+        try {
+            Scanner memberRepository = null;
+            return (List<Member>) memberRepository.findAll();
+        } finally {
+            long finish = System.currentTimeMillis();
+            long timeMs = finish - start;
+            System.out.println("findMembers " + timeMs + "ms");
+        }
     }
 }
